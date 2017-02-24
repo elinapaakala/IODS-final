@@ -1,5 +1,6 @@
 ---
-title: Final assignment
+title: Open data science, spring 2017 - Final assignment
+author: Elina Paakala, 24.2.2017, elina.paakala@helsinki.fi
 output: html_document
 ---
 
@@ -7,11 +8,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+### Research question: 
+Dairy bulls and cows are selected for breeding mainly based on their Nordic total merit index. We want to find out if there are different types of bulls used in Finland and what kind of bull groups can be found. There are 14 traits in the index. Can we reduce the traits for further analysis with principal component analysis (PCA)? 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+After the dimension reduction a cluster analysis can be performed on the principal components. If the dimension reduction isn't useful the clustering can be done directly with the 14 traits. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+On this assignment I only use the PCA.
+
+Data includes breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. 
+
+## The data wrangling script can be found here: 
 
 ```{r cars}
 summary(cars)
