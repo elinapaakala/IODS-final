@@ -8,7 +8,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Research question: 
+##Research question:##
 Dairy bulls and cows are selected for breeding mainly based on their Nordic total merit index. We want to find out if there are different types of bulls used in Finland and what kind of bull groups can be found. There are 14 traits in the index. Can we reduce the traits for further analysis with principal component analysis (PCA)? 
 
 After the dimension reduction a cluster analysis can be performed on the principal components. If the dimension reduction isn't useful the clustering can be done directly with the 14 traits. 
@@ -17,17 +17,20 @@ On this assignment I only use the PCA.
 
 Data includes two data sets of breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. Bulls that were used less were excluded from the data with Excel. 
 
-The data wrangling script:   
+##The data wrangling script:##
+https://github.com/elinapaakala/IODS-final/blob/master/create_bulls.R
 
 Only the 14 BV variables were kept in the data for PCA
 
-**Read the AY_PCA and HOL_PCA datas into R**
+##Read in and explore the data##
+
+###Read the AY_PCA and HOL_PCA datas into R###
 ```{r}
 AY_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/AY_PCA.csv", sep=",", header=TRUE)
 HOL_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/HOL_PCA.csv", sep=",", header=TRUE)
 ```
 
-**Explore the structure and dimensions of the two datasets**
+###Explore the structure and dimensions of the two datasets###
 ```{r}
 str(AY_PCA)
 dim(AY_PCA)
@@ -37,7 +40,7 @@ dim(HOL_PCA)
 
 There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.
 
-**Summaries of the variables**
+###Summaries of the variables###
 ```{r}
 summary(AY_PCA)
 summary(HOL_PCA)
@@ -58,8 +61,104 @@ str(AY_PCA)
 str(HOL_PCA)
 ```
 
+###Histograms of variables###
+####AY####
+```{r}
+library(plyr)
+library(psych)
+multi.hist(AY_PCA, freq=TRUE, bcol="blue", main="")
+```
 
 
+####HOL####
+```{r}
+multi.hist(HOL_PCA, freq=TRUE, bcol="blue", main="")
+```
+
+(The histograms did not look this flat in RStudio.)
+All variables in both breeds are nicely evenly distributed.
+
+###Correlations between different BVs in Ayrshire bulls###
+```{r message = FALSE}
+library(corrplot)
+library(tidyverse)
+cor_matrix_AY<-cor(AY_PCA) %>% round(digits=2)
+
+corrplot(cor_matrix_AY, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6)
+```
+
+Highest positive correlations are between Yield and Growth as well as Yield and Longevity and strongest negative correlation between Birth and Frame.
+
+
+###Correlations between different BVs in Holstein bulls###
+```{r}
+cor_matrix_HOL<-cor(HOL_PCA) %>% round(digits=2)
+
+corrplot(cor_matrix_HOL, method="circle", type="upper", cl.pos="b", tl.pos="d", tl.cex=0.6)
+```
+
+Highest positive correlations can be found between Udder Health and Longevity as well as between Other Diseases and Longevity and highest negative correalation can be found between Frame and Longevity.
+
+
+#PCA#
+
+Principal component analysis (PCA) is a statistical technique to reduce the variables in the data. It combines the correlated variables into uncorrelated variables called principal components (PC). The number of PC is equal or less than the original number of variables. With less variables (components) interpretation of data is easier. 
+
+##PCA on unstandardized data for Ayrshire bulls##
+```{r}
+pca_AY = prcomp(AY_PCA)
+```
+###Create and print out a summary###
+```{r}
+s_pca_AY <- summary(pca_AY)
+s_pca_AY
+```
+ 
+###The percentages of variance###
+```{r}
+pca_AY_pr <- round(100*s_pca_AY$importance[2, ], digits = 1)
+pca_AY_pr
+```
+
+###Create object pc_lab to be used as axis labels###
+```{r}
+pc_AY_lab <- paste0(names(pca_AY_pr), " (", pca_AY_pr, "%)")
+```
+
+###Draw a biplot###
+```{r}
+biplot(pca_AY, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_lab[1], ylab = pc_AY_lab[2])
+```
+
+
+
+##PCA on standardized data for Ayrshire bulls##
+```{r}
+AY_PCA_std <- scale(AY_PCA)
+pca_AY_std = prcomp(AY_PCA_std)
+```
+###Create and print out a summary###
+```{r}
+s_pca_AY_std <- summary(pca_AY_std)
+s_pca_AY_std
+```
+ 
+###The percentages of variance###
+```{r}
+pca_AY_std_pr <- round(100*s_pca_AY_std$importance[2, ], digits = 1)
+pca_AY_std_pr
+```
+
+###Create object pc_lab to be used as axis labels###
+```{r}
+pc_AY_std_lab <- paste0(names(pca_AY_std_pr), " (", pca_AY_std_pr, "%)")
+```
+
+
+###Draw a biplot###
+```{r}
+biplot(pca_AY_std, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_std_lab[1], ylab = pc_AY_std_lab[2])
+```
 
 
 
