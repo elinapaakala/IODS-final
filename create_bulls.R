@@ -16,76 +16,43 @@ dim(HOL)
 summary(AY)
 summary(HOL)
 
-#Rename the variables
-library(plyr)
-hd = rename(hd, c("Human.Development.Index..HDI."="HDI", "Life.Expectancy.at.Birth"="LEXP", 
-                  "Expected.Years.of.Education"="EYE", "Mean.Years.of.Education"="MYE", 
-                  "Gross.National.Income..GNI..per.Capita"="GNI", 
-                  "GNI.per.Capita.Rank.Minus.HDI.Rank"="GNI-HDI"))
-gii = rename(gii, c("Gender.Inequality.Index..GII."="GII", "Maternal.Mortality.Ratio"="MMR", 
-                    "Adolescent.Birth.Rate"="ABR", "Percent.Representation.in.Parliament"="PRP", 
-                    "Population.with.Secondary.Education..Female."="PSE_F", 
-                    "Population.with.Secondary.Education..Male."="PSE_M",
-                    "Labour.Force.Participation.Rate..Female."="LFPR_F", 
-                    "Labour.Force.Participation.Rate..Male."="LFPR_M"))
+#There are 20 variables in both data sets. AY data has information of 176 Ayrshire bulls 
+#and HOL data has information of 232 Holstein bulls.
 
-#Mutate the "Gender inequality" data
-library(dplyr)
-#Define a new column with ratio of female and male populations with secondary education
-gii <- mutate(gii, ratio_PSE_F_PSE_M = PSE_F/PSE_M)
-#Define a new column with ratio of labour force participation of females and males
-gii <- mutate(gii, ratio_LFPR_F_LFPR_M = LFPR_F/LFPR_M)
-
-#Join the two datasets by Country
-human <- inner_join(hd, gii, by = "Country")
-
-# Save the dataset to data folder
-write.csv(human, file = "human")
-
+# The variables:
+# BovineIdBull = Bulls ID in the Finnish cattle database
+# Freq = Number of times the bull was used inseminations in 2015
+# BirthCountry = Birth country of the bull, CAN = Canada, DNK = Denmark, FIN = Finland, NOR = Norway, SWE = Sweden and USA = United States
+# BirthYear = Birth year of the bull
+# NameLong = Bulls name
+# Yield = Breeding value(BV) for milk yield
+# Growth = BV for growth
+# Fertility = BV for fertility
+# Birth = BV for birth index
+# Calving = BV for calving index
+# Udder.health = BV for udder health
+# Other.diseases = BV for other diseases (than udder and claw diseases)
+# Frame = BV for frame conformation
+# Feet..Legs = BV for feet and leg conformation
+# Udder = BV for udder conformation
+# Milkability = BV for milkability (milking speed)
+# Temperament = BV for temperament
+# Longevity = BV for longevity 
+# Claw health = BV for claw health
+# NTM = Total merit index combined of the 14 above BVs with weighting
 
 
-#RStudio Exercise 5:
+# The PCA is performed with only the 14 BVs so a new data with only these variables is needed
+AY_PCA = subset(AY, select = -c(1, 2, 3, 4, 5, 20) )
+HOL_PCA = subset(HOL, select = -c(1, 2, 3, 4, 5, 20) )
 
-#Read in the data
-human <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human1.txt", sep=",", header=TRUE)
-summary(human)
+# Look at the structure of the two new datasets
+str(AY_PCA)
+str(HOL_PCA)
 
+# There are now only the 14 BV variables in both datasets.
 
-# Transform the GNI variable to numeric
-human <- mutate(human, GNI = as.numeric(GNI))
+# Save the datasets to working directory
+write.csv(AY_PCA, file = "AY_PCA.csv")
+write.csv(HOL_PCA, file = "HOL_PCA.csv")
 
-
-# Select the column names to keep in the dataset
-keep_columns <- c("Country", "Edu2.FM", "Labo.FM", "Edu.Exp", "Life.Exp", "GNI", "Mat.Mor", "Ado.Birth", "Parli.F")
-# Select the kept columns to create a new dataset
-human <- select(human, one_of(keep_columns))
-
-### Remove all rows with missing values
-# print out a completeness indicator of the 'human' data
-complete.cases(human)
-# print out the data along with a completeness indicator as the last column
-data.frame(human[-1], comp = complete.cases(human))
-# Filter out all rows with NA values
-human_ <- filter(human, complete.cases(human))
-
-
-### Remove the observations not relating to countries
-# look at the last 10 observations of human
-tail(human_, n=10)
-# define the last indice we want to keep
-last <- nrow(human_) - 7
-# choose everything until the last 7 observations
-human_ <- human_[1:last, ]
-
-
-# add countries as rownames
-rownames(human_) <- human_$Country
-# remove the country name column
-human_ <- select(human_, -Country)
-
-str(human_)
-summary(human_)
-human_
-
-# Save the dataset to data folder
-write.csv(human, file = "human")

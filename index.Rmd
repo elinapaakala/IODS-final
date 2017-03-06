@@ -15,20 +15,51 @@ After the dimension reduction a cluster analysis can be performed on the princip
 
 On this assignment I only use the PCA.
 
-Data includes breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. 
+Data includes two data sets of breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. Bulls that were used less were excluded from the data with Excel. 
 
-## The data wrangling script can be found here: 
+The data wrangling script:   
 
-```{r cars}
-summary(cars)
+Only the 14 BV variables were kept in the data for PCA
+
+**Read the AY_PCA and HOL_PCA datas into R**
+```{r}
+AY_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/AY_PCA.csv", sep=",", header=TRUE)
+HOL_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/HOL_PCA.csv", sep=",", header=TRUE)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+**Explore the structure and dimensions of the two datasets**
+```{r}
+str(AY_PCA)
+dim(AY_PCA)
+str(HOL_PCA)
+dim(HOL_PCA)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.
+
+**Summaries of the variables**
+```{r}
+summary(AY_PCA)
+summary(HOL_PCA)
+```
+
+The breeding values have mean of 100 and standard deviation of 10 in the population level. In these datasets the means are in most cases over 100 because the AI bulls (usually) are the individuals that have the best breeding values of the whole population. But there are also bulls with very low breeding values because farmers sometimes want to use bulls with high BVs on some certain trait and do not then care about other traits. 
+
+For some reason R puts an extra varaibal X to both data sets. This has to be removed before the PCA.
+
+```{r}
+AY_PCA = subset(AY_PCA, select = -c(1))
+HOL_PCA = subset(HOL_PCA, select = -c(1))
+```
+
+Check that the X variable is removed
+```{r}
+str(AY_PCA)
+str(HOL_PCA)
+```
+
+
+
+
+
+
