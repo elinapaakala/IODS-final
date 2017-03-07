@@ -21,47 +21,51 @@ Data includes two data sets of breeding values of AI (artificial insemination) b
 
 ##Data wrangling:##  
 
-###The data wrangling script:###
+####The data wrangling script:####
 https://github.com/elinapaakala/IODS-final/blob/master/create_bulls.R
 
 Only the 14 variables with traits breeding values were kept in the data for PCA.  
 
+
 ##Read in and explore the data##
 
-###Read the AY_PCA and HOL_PCA datas into R###
+
 ```{r}
 AY_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/AY_PCA.csv", sep=",", header=TRUE)
 HOL_PCA <- read.csv("H:/Jatko-opinnot/Open data science/IODS-final/HOL_PCA.csv", sep=",", header=TRUE)
 ```
 
-###Explore the structure and dimensions of the two datasets###
+
 ```{r}
 str(AY_PCA)
-dim(AY_PCA)
 str(HOL_PCA)
-dim(HOL_PCA)
 ```
 
-There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.Both datasets include the same variables:  
-BovineIdBull = Bulls ID in the Finnish cattle database
-Freq = Number of times the bull was used inseminations in 2015
-BirthCountry = Birth country of the bull, CAN = Canada, DNK = Denmark, FIN = Finland, NOR = Norway, SWE = Sweden and USA = United States
-BirthYear = Birth year of the bull
-NameLong = Bulls name
-Yield = Breeding value(BV) for milk yield
-Growth = BV for growth
-Fertility = BV for fertility
-Birth = BV for birth index
-Calving = BV for calving index
-Udder.health = BV for udder health
-Other.diseases = BV for other diseases (than udder and claw diseases)
-Frame = BV for frame conformation
-Feet..Legs = BV for feet and leg conformation
-Udder = BV for udder conformation
-Milkability = BV for milkability (milking speed)
-Temperament = BV for temperament
-Longevity = BV for longevity 
-Claw.health = BV for claw health
+There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.  
+
+Both datasets include the same variables:  
+
+Variable | Description
+--------- | ----------------------------------------
+|BovineIdBull|Bulls ID in the Finnish cattle database|
+|Freq|Number of times the bull was used inseminations in 2015|
+|BirthCountry|Birth country of the bull, CAN = Canada, DNK = Denmark, FIN = Finland, NOR = Norway, SWE = Sweden and USA = United States|
+|BirthYear|Birth year of the bull|
+|NameLong|Bulls name|
+|Yield|Breeding value(BV) for milk yield|
+|Growth|BV for growth| 
+|Fertility|BV for fertility|
+|Birth|BV for birth index|
+|Calving|BV for calving index|  
+|Udder.health|BV for udder health|  
+|Other.diseases|BV for other diseases (than udder and claw diseases)|  
+|Frame|BV for frame conformation|  
+|Feet..Legs|BV for feet and leg conformation|  
+|Udder|BV for udder conformation|  
+|Milkability|BV for milkability (milking speed)|  
+|Temperament|BV for temperament|  
+|Longevity|BV for longevity|   
+|Claw.health|BV for claw health|  
 
 
 ###Summaries of the variables###
@@ -119,27 +123,27 @@ corrplot(cor_matrix_HOL, method="circle", type="upper", cl.pos="b", tl.pos="d", 
 Highest positive correlations can be found between Udder Health and Longevity as well as between Other Diseases and Longevity and highest negative correalation can be found between Frame and Longevity.
 
 
-#PCA#
+##PCA##
 
 Principal component analysis (PCA) is a statistical technique to reduce the variables in the data. It combines the correlated variables into uncorrelated variables called principal components (PC). The number of PC is equal or less than the original number of variables. With less variables (components) interpretation of data is easier. 
 
-##PCA on unstandardized data for Ayrshire bulls##
+###PCA on unstandardized data for Ayrshire bulls###
 ```{r}
 pca_AY = prcomp(AY_PCA)
 ```
-###Summary###
+####Summary####
 ```{r}
 s_pca_AY <- summary(pca_AY)
 s_pca_AY
 ```
 
-###The percentages of variance###
+####The percentages of variance####
 ```{r}
 pca_AY_pr <- round(100*s_pca_AY$importance[2, ], digits = 1)
 pca_AY_pr
 ```
 
-###Draw a biplot###
+####The biplot####
 ```{r}
 pc_AY_lab <- paste0(names(pca_AY_pr), " (", pca_AY_pr, "%)")
 biplot(pca_AY, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_lab[1], ylab = pc_AY_lab[2])
@@ -147,24 +151,24 @@ biplot(pca_AY, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_l
 
 The first principal component captures 34.8 % of the variation, the second 12.4 % and the third 11.3 %. The first component is not very large. Also the arrows in the biplot don't give very clear picture of the components. First component could be called Production - Conformation. The longest arrows to the right (Yield, Longevity, Growt and Milkability) describe production traits and arrows to the left (Udder and Frame) describe the conformation of cow. The arrows to right and left are moderately correlated with each other as was seen also in the correlation plot. The second component has only Feet and legs describing it. First four components explain two third of the variance. This indicas that reducing the variables isn't usuful with this data.
 
-##PCA on standardized data for Ayrshire bulls##
+###PCA on standardized data for Ayrshire bulls###
 ```{r}
 AY_PCA_std <- scale(AY_PCA)
 pca_AY_std = prcomp(AY_PCA_std)
 ```
-###Summary###
+####Summary####
 ```{r}
 s_pca_AY_std <- summary(pca_AY_std)
 s_pca_AY_std
 ```
  
-###The percentages of variance###
+####The percentages of variance####
 ```{r}
 pca_AY_std_pr <- round(100*s_pca_AY_std$importance[2, ], digits = 1)
 pca_AY_std_pr
 ```
 
-###Draw a biplot###
+####The biplot####
 ```{r}
 pc_AY_std_lab <- paste0(names(pca_AY_std_pr), " (", pca_AY_std_pr, "%)")
 biplot(pca_AY_std, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_std_lab[1], ylab = pc_AY_std_lab[2])
@@ -174,23 +178,23 @@ Standardizing the data reduces the percentage of variation captured by the first
 
 
 
-##PCA on unstandardized data for Holstein bulls##
+###PCA on unstandardized data for Holstein bulls###
 ```{r}
 pca_HOL = prcomp(HOL_PCA)
 ```
-###Summary###
+####Summary####
 ```{r}
 s_pca_HOL <- summary(pca_HOL)
 s_pca_HOL
 ```
  
-###The percentages of variance###
+####The percentages of variance####
 ```{r}
 pca_HOL_pr <- round(100*s_pca_HOL$importance[2, ], digits = 1)
 pca_HOL_pr
 ```
 
-###Draw a biplot###
+####The biplot####
 ```{r}
 pc_HOL_lab <- paste0(names(pca_HOL_pr), " (", pca_HOL_pr, "%)")
 biplot(pca_HOL, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_HOL_lab[1], ylab = pc_HOL_lab[2])
@@ -199,24 +203,24 @@ biplot(pca_HOL, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_HOL
 30.8 % of variance is captured by the first principal component and 12.2 % by the second. Longevity is positively highly correlated health and fertility traits which can be seen from the biplot as well as from the correlation plot. Arrows pointing to left are Udder and Frame conformation. The first component could there fore be called Vitality - Conformation. This is a bit surprising as Udder conformation is in general thought to be associated with longer productive life (Longevity) and better health but on the other hand Frame is not. 
 
 
-##PCA on standardized data for Holstein bulls##
+###PCA on standardized data for Holstein bulls###
 ```{r}
 HOL_PCA_std <- scale(HOL_PCA)
 pca_HOL_std = prcomp(HOL_PCA_std)
 ```
-###Summary###
+####Summary####
 ```{r}
 s_pca_HOL_std <- summary(pca_HOL_std)
 s_pca_HOL_std
 ```
  
-###The percentages of variance###
+####The percentages of variance####
 ```{r}
 pca_HOL_std_pr <- round(100*s_pca_HOL_std$importance[2, ], digits = 1)
 pca_HOL_std_pr
 ```
 
-###Draw a biplot###
+####The biplot####
 ```{r}
 pc_HOL_std_lab <- paste0(names(pca_HOL_std_pr), " (", pca_HOL_std_pr, "%)")
 biplot(pca_HOL_std, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_HOL_std_lab[1], ylab = pc_HOL_std_lab[2])
