@@ -9,18 +9,22 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ##Research question:##
-Dairy bulls and cows are selected for breeding mainly based on their Nordic total merit index. We want to find out if there are different types of bulls used in Finland and what kind of bull groups can be found. There are 14 traits in the index. Can we reduce the traits for further analysis with principal component analysis (PCA)? 
+Dairy bulls and cows are selected for breeding mainly based on their Nordic total merit index. This is a combined index with 14 different traits (for example milk yield, udder health and calving traits). The traits are weighted on their economic importance. 
+
+We want to find out if there are different types of bulls used in Finland and what kind of bull groups can be found. There are 14 traits in the index. Can we reduce the traits for further analysis with principal component analysis (PCA)? 
 
 After the dimension reduction a cluster analysis can be performed on the principal components. If the dimension reduction isn't useful the clustering can be done directly with the 14 traits. 
 
-On this assignment I only use the PCA.
+On this assignment I only do the PCA.
 
-Data includes two data sets of breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. Bulls that were used less were excluded from the data with Excel. 
+Data includes two data sets of breeding values of AI (artificial insemination) bulls from two main dairy breeds in Finland (Ayrshire and Holstein) that were used atleast 100 times in Finnish dairy herds during 2015. Bulls that were used less were excluded from the data with Excel on earlier stage. 
 
-##The data wrangling script:##
+##Data wrangling:##  
+
+###The data wrangling script:###
 https://github.com/elinapaakala/IODS-final/blob/master/create_bulls.R
 
-Only the 14 BV variables were kept in the data for PCA
+Only the 14 variables with traits breeding values were kept in the data for PCA.  
 
 ##Read in and explore the data##
 
@@ -38,7 +42,27 @@ str(HOL_PCA)
 dim(HOL_PCA)
 ```
 
-There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.
+There are 176 Ayrshire bulls and 232 Holstein bulls in the data sets.Both datasets include the same variables:  
+BovineIdBull = Bulls ID in the Finnish cattle database
+Freq = Number of times the bull was used inseminations in 2015
+BirthCountry = Birth country of the bull, CAN = Canada, DNK = Denmark, FIN = Finland, NOR = Norway, SWE = Sweden and USA = United States
+BirthYear = Birth year of the bull
+NameLong = Bulls name
+Yield = Breeding value(BV) for milk yield
+Growth = BV for growth
+Fertility = BV for fertility
+Birth = BV for birth index
+Calving = BV for calving index
+Udder.health = BV for udder health
+Other.diseases = BV for other diseases (than udder and claw diseases)
+Frame = BV for frame conformation
+Feet..Legs = BV for feet and leg conformation
+Udder = BV for udder conformation
+Milkability = BV for milkability (milking speed)
+Temperament = BV for temperament
+Longevity = BV for longevity 
+Claw.health = BV for claw health
+
 
 ###Summaries of the variables###
 ```{r}
@@ -55,14 +79,9 @@ AY_PCA = subset(AY_PCA, select = -c(1))
 HOL_PCA = subset(HOL_PCA, select = -c(1))
 ```
 
-Check that the X variable is removed
-```{r}
-str(AY_PCA)
-str(HOL_PCA)
-```
 
 ###Histograms of variables###
-####AY####
+####Ayrshire bulls####
 ```{r}
 library(plyr)
 library(psych)
@@ -70,7 +89,7 @@ multi.hist(AY_PCA, freq=TRUE, bcol="blue", main="")
 ```
 
 
-####HOL####
+####Holstein bulls####
 ```{r}
 multi.hist(HOL_PCA, freq=TRUE, bcol="blue", main="")
 ```
@@ -78,7 +97,7 @@ multi.hist(HOL_PCA, freq=TRUE, bcol="blue", main="")
 (The histograms did not look this flat in RStudio.)
 All variables in both breeds are nicely evenly distributed.
 
-###Correlations between different BVs in Ayrshire bulls###
+###Correlations between different breeding values in Ayrshire bulls###
 ```{r message = FALSE}
 library(corrplot)
 library(tidyverse)
@@ -90,7 +109,7 @@ corrplot(cor_matrix_AY, method="circle", type="upper", cl.pos="b", tl.pos="d", t
 Highest positive correlations are between Yield and Growth as well as Yield and Longevity and strongest negative correlation between Birth and Frame.
 
 
-###Correlations between different BVs in Holstein bulls###
+###Correlations between different breeding values in Holstein bulls###
 ```{r}
 cor_matrix_HOL<-cor(HOL_PCA) %>% round(digits=2)
 
@@ -108,36 +127,32 @@ Principal component analysis (PCA) is a statistical technique to reduce the vari
 ```{r}
 pca_AY = prcomp(AY_PCA)
 ```
-###Create and print out a summary###
+###Summary###
 ```{r}
 s_pca_AY <- summary(pca_AY)
 s_pca_AY
 ```
- 
+
 ###The percentages of variance###
 ```{r}
 pca_AY_pr <- round(100*s_pca_AY$importance[2, ], digits = 1)
 pca_AY_pr
 ```
 
-###Create object pc_lab to be used as axis labels###
-```{r}
-pc_AY_lab <- paste0(names(pca_AY_pr), " (", pca_AY_pr, "%)")
-```
-
 ###Draw a biplot###
 ```{r}
+pc_AY_lab <- paste0(names(pca_AY_pr), " (", pca_AY_pr, "%)")
 biplot(pca_AY, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_lab[1], ylab = pc_AY_lab[2])
 ```
 
-
+The first principal component captures 34.8 % of the variation, the second 12.4 % and the third 11.3 %. The first component is not very large. Also the arrows in the biplot don't give very clear picture of the components. First component could be called Production - Conformation. The longest arrows to the right (Yield, Longevity, Growt and Milkability) describe production traits and arrows to the left (Udder and Frame) describe the conformation of cow. The arrows to right and left are moderately correlated with each other as was seen also in the correlation plot. The second component has only Feet and legs describing it. First four components explain two third of the variance. This indicas that reducing the variables isn't usuful with this data.
 
 ##PCA on standardized data for Ayrshire bulls##
 ```{r}
 AY_PCA_std <- scale(AY_PCA)
 pca_AY_std = prcomp(AY_PCA_std)
 ```
-###Create and print out a summary###
+###Summary###
 ```{r}
 s_pca_AY_std <- summary(pca_AY_std)
 s_pca_AY_std
@@ -149,16 +164,66 @@ pca_AY_std_pr <- round(100*s_pca_AY_std$importance[2, ], digits = 1)
 pca_AY_std_pr
 ```
 
-###Create object pc_lab to be used as axis labels###
-```{r}
-pc_AY_std_lab <- paste0(names(pca_AY_std_pr), " (", pca_AY_std_pr, "%)")
-```
-
-
 ###Draw a biplot###
 ```{r}
+pc_AY_std_lab <- paste0(names(pca_AY_std_pr), " (", pca_AY_std_pr, "%)")
 biplot(pca_AY_std, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_AY_std_lab[1], ylab = pc_AY_std_lab[2])
 ```
 
+Standardizing the data reduces the percentage of variation captured by the first component. It is now only 28.6 %. This indicates that maybe standardization isn't needed. This is supported also by the fact that the variables were originally on the same scale and standardized (mean = 100, sd = 10). The arrows are now longer but still pointing more or less to the same directions as with unstandardized data.
 
 
+
+##PCA on unstandardized data for Holstein bulls##
+```{r}
+pca_HOL = prcomp(HOL_PCA)
+```
+###Summary###
+```{r}
+s_pca_HOL <- summary(pca_HOL)
+s_pca_HOL
+```
+ 
+###The percentages of variance###
+```{r}
+pca_HOL_pr <- round(100*s_pca_HOL$importance[2, ], digits = 1)
+pca_HOL_pr
+```
+
+###Draw a biplot###
+```{r}
+pc_HOL_lab <- paste0(names(pca_HOL_pr), " (", pca_HOL_pr, "%)")
+biplot(pca_HOL, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_HOL_lab[1], ylab = pc_HOL_lab[2])
+```
+
+30.8 % of variance is captured by the first principal component and 12.2 % by the second. Longevity is positively highly correlated health and fertility traits which can be seen from the biplot as well as from the correlation plot. Arrows pointing to left are Udder and Frame conformation. The first component could there fore be called Vitality - Conformation. This is a bit surprising as Udder conformation is in general thought to be associated with longer productive life (Longevity) and better health but on the other hand Frame is not. 
+
+
+##PCA on standardized data for Holstein bulls##
+```{r}
+HOL_PCA_std <- scale(HOL_PCA)
+pca_HOL_std = prcomp(HOL_PCA_std)
+```
+###Summary###
+```{r}
+s_pca_HOL_std <- summary(pca_HOL_std)
+s_pca_HOL_std
+```
+ 
+###The percentages of variance###
+```{r}
+pca_HOL_std_pr <- round(100*s_pca_HOL_std$importance[2, ], digits = 1)
+pca_HOL_std_pr
+```
+
+###Draw a biplot###
+```{r}
+pc_HOL_std_lab <- paste0(names(pca_HOL_std_pr), " (", pca_HOL_std_pr, "%)")
+biplot(pca_HOL_std, cex = c(0.5, 0.5), col = c("grey40", "deeppink2"), xlab = pc_HOL_std_lab[1], ylab = pc_HOL_std_lab[2])
+```
+
+With Holstein the difference between unstandardized and standardized data in percanteges of variance and the biplot are even smaller than with Ayrshire data.
+
+
+##Conclusions an discussion##
+Standardizing the data did not make much difference in either breed. This is because the original data was already standardized and in same scale. Percentage of variance for the first principal component was quite low in each case. Also, it was hard to find clear descriptions for the first two components in each case. Therefore the conlusion is that reducing the varaibles isn't usefull for further analysis. However, the PCA shows (which came clear in further analyses of my actual study (not included in this report)) that conformation traits (Frame and Udder) versus all other traits seperate the bulls the most. 
